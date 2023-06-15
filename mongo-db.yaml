@@ -1,0 +1,54 @@
+apiVersion: apps/v1         # because Deployment belongs to apps group in k8s API
+kind: Deployment
+metadata:
+  name: mongodb
+  labels:                   # assign labels (as "key: value" pairs) to Deployment
+                            # useful examples
+                            # environment: dev
+                            # version: v3.12
+    app: mongodb
+spec:
+  replicas: 1
+  selector:                 # selector tells Deployment which pods to manage
+    matchLabels:            # by telling it to match pods by labels
+      app: mongodb          # and here we say by which labels (this is the label defined on line 18)
+  template:
+    metadata:
+      labels:
+        app: mongodb        # and here is the label that the selector will match
+                            # even though this may seem redundant at first glance, it is not in more complex systems
+                            # useful for rollbacks for example
+    spec:                   # here we define the blueprint for pods managed by this Deployment
+      containers:
+      - name: mongodb       # - is used to denote a list member in YAML
+        image: mongo
+        ports:
+        - containerPort: 27017  # conteinerPort is commonly used, but we can give it a different name
+        env: 
+          - name: MONGO_INITDB_ROOT_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: mongodb-secret
+                key: mongo-root-username 
+          - name: MONGO_INITDB_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mongodb-secret
+                key: mongo-root-password
+
+# kubectl apply -f mongo-db.yaml
+
+---     # three dashes are used in YAML to separate 2 documents in one file
+        # it is common practice to keep Deployment and Service in one yaml file, because they are strongly connected
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+spec:
+  selector:                   # super important: this is where we tell this service to match the Deployment with label app:mongodb (line 9)
+    app: mongodb
+  ports:
+  - protocol: TCP
+    port: 27017           # service port - the exposed port
+    targetPort: 27017     # container port that this service is targeting
