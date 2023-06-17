@@ -2,15 +2,22 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: dashboard-ingress
-  namespace: kubernetes-dashboard
+  namespace: dashboard
+  annotations:                                        # this provides instructions or configuration to the Ingress controller
+    nginx.ingress.kubernetes.io/rewrite-target: /     # make no modification to url path before forwarding it to the backend service
 spec:
   rules:
   - host: dashboard.com
-    http:
+    http:                     # defines http routing configuration
       paths:
-      - backend:
-          serviceName: kubernetes-dashboard
+      - path: /config         # service dashboard-config is accesed via dashboard.com/config
+        backend:              # backend service to route traffic to
+          serviceName: dashboard-config
+          servicePort: 80
+      - path: /status         # service dashboard-status is accesed via dashboard.com/status
+        backend:              # backend service to route traffic to
+          serviceName: dashboard-status
           servicePort: 80
 
-
 # minikube addons enable ingress            # install Ingress controler in minikube; installed controller in k8S Nginx
+# this is just a simple dumb example to see some basic syntax
