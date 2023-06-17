@@ -23,7 +23,7 @@ spec:
       - name: mongodb       # - is used to denote a list member in YAML
         image: mongo
         ports:
-        - containerPort: 27017  # conteinerPort is commonly used, but we can give it a different name
+        - containerPort: 27017  # if you have multiple ports, they must all be named containerPort
         env: 
           - name: MONGO_INITDB_ROOT_USERNAME
             valueFrom:
