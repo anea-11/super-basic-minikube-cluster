@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mosquitto
+  labels:
+    app: mosquitto
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mosquitto
+  template:
+    metadata:
+      labels:
+        app: mosquitto
+    spec:
+      containers:
+        - name: mosquitto
+          image: eclipse-mosquitto:2.0.15
+          ports:
+            - containerPort: 1883
+          volumeMounts:                             # this is where you connect the container and volumes (defined in volumes Depl section, line 27)
+            - name: mosquitto-config                # match volume name (line 28)
+              mountPath: /mosquitto/config/         # choose the path inside container to mount this volume to
+            - name: mosquitto-secret                # match volume name (line 31)
+              mountPath: /mosquitto/secretStuff     # choose the path inside container to mount this volume to (you can also create new dirs, like secretStuff)
+      volumes:
+        - name: mosquitto-config
+          configMap:                                # mosquitto-configmap must exist in k8S cluster before applying mosquitto.yaml
+            name: mosquitto-configmap
+        - name: mosquitto-secret
+          secret:
+            secretName: mosquitto-secret-dummy      # mosquitto-secret-dummy must exist in k8S cluster before applying mosquitto.yaml
+
+# kubectl apply -f mosquitto.yaml
+
+# kubectl get pods                                          // to get pod name
+# kubectl exec -it <mosquitto-pod-name>  /bin/sh            // to enter the mosquitto pod and see if files are mounted correctly
+
