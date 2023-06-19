@@ -1,0 +1,12 @@
+apiVersion: rbac.authorization.k8s.io/v1        # rbac = Role Based Access Control
+kind: Role
+metadata:
+  name: developer-access
+rules:
+  - apiGroups: [""]                     # empty string indicates core API group
+    resources: ["pods"]                 # this rule allows operations on pods
+    verbs: ["get", "create", "list"]    # grant read, create and list permissions
+  - apiGroups: [""]                     # core API group
+    resources: ["secrets"]              # this rule allows operations on secrets
+    recourceNames: some-secret          # allow operations only on specific secrets
+    verbs: ["get"]                      # grant only read permission for secrets

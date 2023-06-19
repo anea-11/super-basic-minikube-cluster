@@ -1,0 +1,10 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-admin
+rules:
+- apiGroups: [""]
+  resources: ["nodes", "pods", "services", "deployments"]
+  verbs: ["get", "create", "list", "delete", "update"]
+
+  # ClusterRole is used to grant access to admin type of cluster users; these are the people that need cluster-wide access to resources such as nodes
