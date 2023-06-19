@@ -1,0 +1,49 @@
+# PersistentVolume
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-name
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce         # this volume can be mounted as read-write by a single node at a time
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: slow
+  mountOptions:
+    - hard
+    - nfsvers=4.0
+  nfs:
+    path: /dir/path/on/nfs/server
+    server: nfs-server-ip-address
+
+# Storage needs to survive even if the entire cluster crashes ( remote storages are commonly used ).
+# You need to make sure that your config aligns with sotrage requirements and environment
+# PersistentVolumes are not namespaced - they are always accessible to the whole cluster
+
+---
+# PersistentVolumeCLaim (PVC)
+# PVC claims a volume with certain capacity and other characteristics
+# Whatever PersistentVolume there is in the cluster that matches these requirements, it will be used for the app
+# But to use it for the app, you need to configure this PVC as volume in the pod template
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-name
+spec:
+  storageClassName: manual
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+# There is also StorageClass, which creates PersistentVolumes dynamically based on PVCs
+
+# Summary:  PersistentVolume is an abstraction of physical storage, so you need to configure some stuff related to the physical storage inside of it.
+#           PVC is an abstraction on top of that, that does not care about the physical things, so you can only specify the characteristics of the storage
+#             that you need, and k8S will find the right PersistentVolume for you.
